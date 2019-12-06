@@ -6,6 +6,8 @@
 
 %{
 #include <stdio.h>
+#include <math.h>
+#define YYSTYPE double
 
 /* Pré-déclarations */
 int yylex (void);
@@ -17,7 +19,6 @@ extern char* yytext;
 %}
 
 %defines /* Génère le fichier en-tête eval.tab.h */
-
 %token  nombre
 
 %start  EXPR_CALCS /* Axiome de la grammaire */
@@ -28,12 +29,16 @@ EXPR_CALCS : EXPR_CALC
            | EXPR_CALCS EXPR_CALC   
            ;
 
-EXPR_CALC : EXPR '='               { printf("%d\n", $1); }
+EXPR_CALC : EXPR '='               { printf("%f\n", $1); }
           ;
 
 EXPR     : FACTEUR                  
          | EXPR '+' FACTEUR        {$$ = $1 + $3;}
          | EXPR '-' FACTEUR        {$$ = $1 - $3;}
+         | EXPR '*' FACTEUR        {$$ = $1 * $3;}
+         | EXPR '/' FACTEUR        {$$ = $1 / $3;}
+         | EXPR '^' FACTEUR        {$$ = pow($1,$3);}
+         | '-' FACTEUR             {{$$ = - $2;}}
          ;
 
 FACTEUR  : nombre                  {$$ = $1;}
@@ -43,6 +48,7 @@ FACTEUR  : nombre                  {$$ = $1;}
 %%
 #include <stdio.h>
 #include "eval.tab.h"
+
 
 void yyerror (const char * error) 
 {
