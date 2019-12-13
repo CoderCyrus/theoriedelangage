@@ -32,13 +32,19 @@ EXPR_CALCS : EXPR_CALC
 EXPR_CALC : EXPR '='               { printf("%f\n", $1); }
           ;
 
-EXPR     : FACTEUR                  
-         | EXPR '+' FACTEUR        {$$ = $1 + $3;}
-         | EXPR '-' FACTEUR        {$$ = $1 - $3;}
-         | EXPR '*' FACTEUR        {$$ = $1 * $3;}
-         | EXPR '/' FACTEUR        {$$ = $1 / $3;}
-         | EXPR '^' FACTEUR        {$$ = pow($1,$3);}
-         | '-' FACTEUR             {{$$ = - $2;}}
+EXPR     : EXPR '+' TERM        {$$ = $1 + $3;}
+         | EXPR '-' TERM        {$$ = $1 - $3;}
+         | '-' TERM             {$$ = - $2;}
+         | TERM                 {$$ = $1;}
+         ;
+
+TERM     : TERM '*' PUIS        {$$ = $1 * $3;}
+         | TERM '/' PUIS        {$$ = $1 / $3;}
+         | PUIS                 {$$ = $1;}
+         ;
+
+PUIS     : PUIS '^' FACTEUR        {$$ = pow ($1,$3);}
+         | FACTEUR                 {$$ = $1;}
          ;
 
 FACTEUR  : nombre                  {$$ = $1;}
