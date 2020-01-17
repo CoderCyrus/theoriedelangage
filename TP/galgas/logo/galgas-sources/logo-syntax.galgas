@@ -5,50 +5,66 @@ rule <start_symbol> {
   $PROGRAM$
   # définir la table de Routine
   @routineMap tableRoutines = {}
+  @instructionList maListe = {}
   repeat 
   while
     <routine_definition> !?tableRoutines
   end
   #-- Programme principal
   $BEGIN$
-  <instruction_list> !tableRoutines
+    <instruction_list> !tableRoutines !?maListe
   $END$
   $.$
 }
 
-rule <routine_definition> ?!@routineMap ioTableRoutines{
+rule <routine_definition> ?!@routineMap ioTableRoutines  {
+  @instructionList routineList = {}
   $ROUTINE$
   $identifier$ ? let @lstring identifier_id
   $BEGIN$
-  <instruction_list> !ioTableRoutines
+    <instruction_list> !ioTableRoutines !?routineList
   $END$
-  [!?ioTableRoutines insertKey !identifier_id]
+  [!?ioTableRoutines insertKey !identifier_id !routineList]
 }
 
-rule <instruction_list> ?@routineMap ioTableRoutines{
+rule <instruction_list> ?@routineMap ioTableRoutines ?!@instructionList maListe{
   repeat
   while
-  <instruction> !ioTableRoutines
+    <instruction> !ioTableRoutines !?maListe
   end
 }
 
-rule <instruction> ?@routineMap ioTableRoutines{
+rule <instruction> ?@routineMap ioTableRoutines ?!@instructionList maListe{
   select 
-  $FORWARD$ 
-  $integer$ ?*  
+    $FORWARD$ 
+    $integer$ ?let@luint mLength  
+    @instruction instruction = @forward.new{!mLength}
+    maListe += !instruction
   or 
-  $ROTATE$
-  $integer$ ?* 
+    $ROTATE$
+    $integer$ ?let@luint mAngle
+    @instruction instruction = @rotate.new{!mAngle}
+    maListe += !instruction
   or 
-  $PEN$
-  $UP$ 
+    $PEN$
+    $UP$ 
+    $integer$ ?*
+    @instruction instruction = @penUp.new{}
+    maListe += !instruction
   or
-  $PEN$
-  $DOWN$
+   $PEN$
+   $DOWN$
+   $integer$ ?*
+   @instruction instruction = @penDown.new{}
+   maListe += !instruction
   or
-  $CALL$
-  $identifier$ ? let @lstring nomIden
-  [ioTableRoutines searchKey !nomIden]
+    $CALL$
+    @instructionList routineList = {}
+    $identifier$ ? let @lstring nomIden
+    [ioTableRoutines searchKey !nomIden ?routineList]
+    for i in routineList do 
+      routineList += !i.mInstruction 
+    end
   end
   $;$
 }

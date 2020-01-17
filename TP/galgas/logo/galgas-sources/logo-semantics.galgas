@@ -1,6 +1,31 @@
 map @routineMap{
+ @instructionList mInstructionList
  insert insertKey error message "the '%K' routine has been already declared"
  search searchKey error message "the '%K' routine is not declared"
+}
+
+abstract class @instruction codeDisplay{
+    ?!@bool ioPenDown
+    ?!@double ioX
+    ?!@double ioY
+    ?!@double ioAngle
+}
+class @penUp : @instruction {
+  
+}
+class @penDown: @instruction{
+
+}
+class @forward : @instruction{
+    @luint mLength
+    
+}
+class @rotate : @instruction{
+    @luint mAngle
+    
+}
+list @instructionList {
+    @instruction mInstruction
 }
 
 
